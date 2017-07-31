@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/EmanuelN/w2d1githubproject#readme",
   "dependencies": {
+    "dotenv": "^4.0.0",
     "request": "^2.81.0"
   }
 }

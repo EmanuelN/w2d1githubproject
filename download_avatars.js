@@ -1,5 +1,7 @@
 var request = require('request');
 var fs = require('fs');
+var ownerRepo = process.argv[2];
+var nameRepo = process.argv[3];
 
 const GITHUB_USER = "EmanuelN";
 const GITHUB_TOKEN = "36412cc8405fa83d470e87a3c1324504524a98b4";
@@ -36,6 +38,7 @@ function downloadImageByURL(url, filePath){
   })
   .pipe(fs.createWriteStream(filePath));
 }
-getRepoContributors('jquery', 'jquery', getURLs);
-
-downloadImageByURL("https://avatars2.githubusercontent.com/u/2741?v=3&s=466", "./avatars/kvirani.jpg")
+if (process.argv[2] === undefined || process.argv[3] === undefined){
+  console.log("You must enter both the repo's owner and name!");
+} else {getRepoContributors(ownerRepo, nameRepo, getURLs);
+}

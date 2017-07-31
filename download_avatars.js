@@ -14,7 +14,9 @@ function getRepoContributors(repoOwner, repoName, cb){
       'User-Agent': 'AvatarProject'
     }
   };
-
+  if (!checkCredentials(GITHUB_USER, requestURL, options)){
+    return
+  }
   request(options, function(err, res, body){
     cb(err, res, body)
   });
@@ -23,6 +25,10 @@ function getRepoContributors(repoOwner, repoName, cb){
 function getURLs(err, res, body) {
   if (err) throw err;
   var obj = JSON.parse(body)
+  if (obj.message === "Not Found"){
+    console.log("The Owner or Repo you specified do not exist");
+    return
+  }
   for (var i in obj){
     downloadImageByURL(obj[i].avatar_url, "avatars/"+obj[i].login+".jpg")
   }
@@ -38,7 +44,38 @@ function downloadImageByURL(url, filePath){
   })
   .pipe(fs.createWriteStream(filePath));
 }
-if (process.argv[2] === undefined || process.argv[3] === undefined){
-  console.log("You must enter both the repo's owner and name!");
-} else {getRepoContributors(ownerRepo, nameRepo, getURLs);
+
+function checkCredentials(user, token, options){
+  var urlUser = "https://github.com/"+user;
+  request(urlUser, function(error, response, body){
+    if (error) console.log("error:", error);
+    if (response.statusCode == 404){
+      console.log("You've put in an invalid User in your .env!");
+      return false;
+    }
+  });
+  request(options, function(error, response, body){
+    if (error) console.log("error:", error);
+    if (response.statusCode != 200){
+      console.log("You entered an incorrect token in .env!")
+      return false;
+    }
+
+  });
+
+}
+if (ownerRepo === undefined || nameRepo === undefined || process.argv[4] != undefined){
+  console.log("You must enter both the repo's owner and name but nothing else!");
+} else if (!fs.existsSync("avatars/")){
+  console.log("The path avatars/ does not exist!")
+  console.log("Creating it now...");
+  fs.mkdirSync("avatars/");
+  console.log("Done! Please run me again!")
+} else if (!fs.existsSync(".env")){
+  console.log("You must posess the .env file!");
+  fs.writeFile(".env", "GITHUB_USER = \nGITHUB_TOKEN = ");
+  console.log("Created it for you, please fill it out.")
+} else if (GITHUB_USER == "" || GITHUB_TOKEN == ""){
+  console.log("Please add your information to the .env file")
+} else  {getRepoContributors(ownerRepo, nameRepo, getURLs);
 }

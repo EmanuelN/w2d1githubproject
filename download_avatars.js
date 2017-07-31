@@ -22,7 +22,11 @@ function getRepoContributors(repoOwner, repoName, cb){
   });
 }
 
-function getURLs(err, res, body) {
+function getAvatars(err, res, body){
+  loopThroughContributors(err, res, body, downloadImageByURL);
+}
+
+function loopThroughContributors(err, res, body, cb) {
   if (err) throw err;
   var obj = JSON.parse(body)
   if (obj.message === "Not Found"){
@@ -30,11 +34,12 @@ function getURLs(err, res, body) {
     return
   }
   for (var i in obj){
-    downloadImageByURL(obj[i].avatar_url, "avatars/"+obj[i].login+".jpg")
+    cb(obj[i]);
   }
 }
-
-function downloadImageByURL(url, filePath){
+function downloadImageByURL(obj){
+  var url = obj.avatar_url;
+  var filePath = "avatars/"+obj.login+".jpg"
   request.get(url)
   .on('error', function(err){
     throw err;
@@ -62,6 +67,7 @@ function checkCredentials(user, token, options){
     }
 
   });
+  return true
 
 }
 if (ownerRepo === undefined || nameRepo === undefined || process.argv[4] != undefined){
@@ -77,5 +83,5 @@ if (ownerRepo === undefined || nameRepo === undefined || process.argv[4] != unde
   console.log("Created it for you, please fill it out.")
 } else if (GITHUB_USER == "" || GITHUB_TOKEN == ""){
   console.log("Please add your information to the .env file")
-} else  {getRepoContributors(ownerRepo, nameRepo, getURLs);
+} else  {getRepoContributors(ownerRepo, nameRepo, getAvatars);
 }

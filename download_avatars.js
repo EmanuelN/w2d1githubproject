@@ -20,11 +20,10 @@ function getRepoContributors(repoOwner, repoName, cb){
 
 function getURLs(err, res, body) {
   if (err) throw err;
-    var obj = JSON.parse(body)
-    var avatarURLS = []
-    for (var i in obj){
-      avatarURLS.push(obj[i].avatar_url);
-    }
+  var obj = JSON.parse(body)
+  for (var i in obj){
+    downloadImageByURL(obj[i].avatar_url, "avatars/"+obj[i].login+".jpg")
+  }
 }
 
 function downloadImageByURL(url, filePath){
@@ -33,7 +32,7 @@ function downloadImageByURL(url, filePath){
     throw err;
   })
   .on('response', function(response){
-    console.log("Response Status Code: ", response.statusCode);
+    console.log("Downloading Avatar...");
   })
   .pipe(fs.createWriteStream(filePath));
 }
